@@ -12,6 +12,7 @@ add_subdirectory(src/db)
 add_subdirectory(src/game)
 add_subdirectory(src/net)
 add_subdirectory(src/shared)
+add_subdirectory(proto)
 
 # enable tests
 option(SERVER_BUILD_TESTS "Build unit tests" ON)

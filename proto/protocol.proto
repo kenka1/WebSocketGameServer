@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package game.protocol.v1;
+
+option optimize_for = SPEED;
+option cc_enable_arenas = true;
+
+// =======================================================
+// Protocol notes
+// - Transport framing is handled outside protobuf
+// - Wire format: [uint32 length][PacketHeader][Body]
+// - Opcode uniquely identifies body message type
+// - Field numbers are never reused
+// =======================================================
+
+// =======================================================
+// Opcodes
+// =======================================================
+
+enum Opcode {
+  OPCODE_UNSPECIFIED = 0;
+
+  // --- Auth ---
+  OPCODE_AUTH_REQUEST  = 0x0101;
+  OPCODE_AUTH_RESPONSE = 0x0102;
+
+  // --- Player / Game ---
+  OPCODE_CREATE_PLAYER = 0x0201;
+  OPCODE_PLAYER_INPUT  = 0x0202;
+  OPCODE_PLAYER_STATE  = 0x0203;
+  OPCODE_ADD_PLAYER    = 0x0204;
+  OPCODE_REMOVE_PLAYER = 0x0205;
+}
+
+// =======================================================
+// Common header (protobuf-level)
+// =======================================================
+
+message PacketHeader {
+  uint32 opcode     = 1; // See Opcode enum
+  uint32 version    = 2; // Protocol version (v1 = 1)
+  uint64 request_id = 3; // For async replies / tracing
+}
+
+// =======================================================
+// Auth
+// =======================================================
+
+message AuthRequest {
+  string login    = 1;
+  string password = 2;
+}
+
+message AuthResponse {
+  enum Result {
+    RESULT_UNSPECIFIED = 0;
+    RESULT_OK          = 1;
+    RESULT_INVALID     = 2;
+    RESULT_BANNED      = 3;
+  }
+
+  Result result  = 1;
+  uint64 user_id = 2;
+}
+
+// =======================================================
+// Player / Game
+// =======================================================
+
+message Vec2 {
+  float x = 1;
+  float y = 2;
+}
+
+message PlayerInput {
+  bool move_left  = 1;
+  bool move_right = 2;
+  bool jump       = 3;
+}
+
+message PlayerState {
+  uint64 player_id = 1;
+  Vec2 position    = 2;
+}
