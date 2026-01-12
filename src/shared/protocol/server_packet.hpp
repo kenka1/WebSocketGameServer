@@ -1,33 +1,41 @@
 #pragma once
 
-#include "net_packet.hpp"
+#include <concepts>
+#include <cstdint>
+
+#include "protocol/packet_head.hpp"
 
 namespace ep
 {
-  enum class PacketType : uint8_t {
+  enum class ResponseType : uint8_t {
+    Incoming,
     Broadcast,
     Rpc,
     RpcOthers,
   };
 
+  template<typename T>
+  concept PODType = std::is_standard_layout_v<T>;
+
+  template<PODType T>
   class ServerPacket {
   public:
-    ServerPacket(NetPacket packet, std::size_t id, PacketType type = PacketType::Broadcast) :
-      packet_(std::move(packet)),
+    ServerPacket(ResponseType type, std::size_t id, PacketHead head, std::optional<T> body = std::nullopt) :
+      type_(type),
       id_(id),
-      type_(type)
+      head_(head),
+      body_(body)
     {}
-    ServerPacket(const ServerPacket&) = delete;
-    ServerPacket& operator=(const ServerPacket&) = delete;
-    ~ServerPacket() = default;
 
-    NetPacket GetNetPacket() noexcept { return std::move(packet_); }
-    std::size_t GetID() const noexcept { return id_; }
-    PacketType GetType() const noexcept { return type_; }
+    std::uint64_t GetID() const noexcept { return id_; }
+    ResponseType GetType() const noexcept { return type_; }
+    PacketHead& GetPacketHead() noexcept { return head_; }
+    std::optional<T>& GetBody() noexcept { return body_; }
 
   private:
-    NetPacket packet_;
-    std::size_t id_;
-    PacketType type_;
+    ResponseType type_;
+    std::uint64_t id_;
+    PacketHead head_;
+    std::optional<T> body_;
   };
 }
