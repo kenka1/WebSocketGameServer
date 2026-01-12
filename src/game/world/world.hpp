@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <unordered_map>
 #include <memory>
 #include <mutex>
@@ -25,12 +26,12 @@ namespace ep::game
     ~World() = default;
 
     void GameLoop();
-    void AddPlayer(std::shared_ptr<IPlayer> player);
-    void RemovePlayer(std::size_t id);
+    void AddPlayer(std::unique_ptr<IPlayer> player);
+    void RemovePlayer(IPlayer& player);
     std::size_t PlayerNumbers() const;
   private:
     void Tick(double dt);
-    void ProcessInput(std::unique_ptr<ServerPacket> packet, double dt);
+    void ProcessInput(ServerPacket<PacketHead>& packet, double dt);
     void Update(IPlayer& player, double dt);
 
     void MovePlayer(IPlayer& player);
@@ -38,8 +39,9 @@ namespace ep::game
     std::shared_ptr<NetworkSubsystem> net_subsystem_;
     std::shared_ptr<GameSubsystem> game_subsystem_;
     const GameConfig& config_;
+    std::uint64_t tick_;
     mutable std::mutex players_mutex_;
-    std::unordered_map<std::size_t, std::shared_ptr<IPlayer>> players_;
+    std::unordered_map<std::size_t, std::unique_ptr<IPlayer>> players_;
     std::vector<Tile> map_;
     Collision collision_;
   };
