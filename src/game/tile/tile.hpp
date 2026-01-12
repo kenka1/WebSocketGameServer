@@ -12,18 +12,18 @@ namespace ep::game
   class Tile : public IBox {
   public:
     Tile() : type_(TileType::Empty) {}
-    explicit Tile(double x, double y, std::uint8_t width, std::uint8_t height, TileType type) noexcept :
+    explicit Tile(float x, float y, std::uint8_t width, std::uint8_t height, TileType type) noexcept :
       x_(x), y_(y), width_(width), height_(height),type_(type)
     {}
 
-    double GetX() const noexcept override { return x_; }
-    double GetY() const noexcept override { return y_; }
+    float GetX() const noexcept override { return x_; }
+    float GetY() const noexcept override { return y_; }
     std::uint8_t GetWidth() const noexcept override { return width_; }
     std::uint8_t GetHeight() const noexcept override { return height_; }
     TileType GetType() const noexcept { return type_; }
   private:
-    double x_;
-    double y_;
+    float x_;
+    float y_;
     std::uint8_t width_;
     std::uint8_t height_;
     TileType type_;

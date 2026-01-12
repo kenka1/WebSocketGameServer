@@ -1,36 +1,45 @@
 #pragma once
 
+#include <atomic>
+
 #include "i_player.hpp"
 
 namespace ep::game
 {
   class Player : public IPlayer {
   public:
-    explicit Player(std::size_t id, double x, double y, double vel_x, double vel_y, std::uint8_t width, std::uint8_t height);
+    Player(std::size_t id, std::uint32_t hp,
+           float x, float y, 
+           float vel_x, float vel_y,
+           std::uint8_t width, std::uint8_t height);
     ~Player() = default;
 
-    double GetX() const noexcept override { return x_; }
-    double GetY() const noexcept override { return y_; }
+    std::size_t GetID() const noexcept override { return id_; }
+    std::uint64_t GetAndIncrementSequenceID() noexcept override { return sequence_id_.fetch_add(1, std::memory_order_acq_rel); }
+    float GetX() const noexcept override { return x_; }
+    float GetY() const noexcept override { return y_; }
+    std::uint32_t GetHP() const noexcept override { return hp_; };
     std::uint8_t GetWidth() const noexcept override { return width_; };
     std::uint8_t GetHeight() const noexcept override { return height_; };
-    std::size_t GetID() const noexcept override { return id_; }
 
-    void Move(double dx, double dy) override;
+    void Move(float dx, float dy) override;
 
     // velocity
-    double GetVelX() const noexcept override { return vel_x_; }
-    double GetVelY() const noexcept override { return vel_y_; }
-    void SetVel(double vel_x, double vel_y) noexcept override { vel_x_ = vel_x; vel_y_ = vel_y; }
+    float GetVelX() const noexcept override { return vel_x_; }
+    float GetVelY() const noexcept override { return vel_y_; }
+    void SetVel(float vel_x, float vel_y) noexcept override { vel_x_ = vel_x; vel_y_ = vel_y; }
 
     bool OnGround() const noexcept override { return on_ground_; }
     void SetOnGround(bool state) noexcept override { on_ground_ = state; }
 
   private:
     std::size_t id_;
-    double x_;
-    double y_;
-    double vel_x_;
-    double vel_y_;
+    std::atomic<std::uint64_t> sequence_id_;
+    std::uint32_t hp_;
+    float x_;
+    float y_;
+    float vel_x_;
+    float vel_y_;
     std::uint8_t width_;
     std::uint8_t height_;
     bool on_ground_;
