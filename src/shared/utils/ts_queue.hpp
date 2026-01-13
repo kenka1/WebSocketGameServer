@@ -19,6 +19,8 @@ namespace ep
     TSQueue() = default;
     TSQueue(const TSQueue&) = delete;
     TSQueue& operator=(const TSQueue&) = delete;
+    TSQueue(TSQueue&& other);
+    TSQueue& operator=(TSQueue&& other);
 
     void Swap(TSQueue<T>& other);
     
@@ -34,6 +36,21 @@ namespace ep
     std::condition_variable data_cond_;
     std::queue<T> data_;
   };
+
+  template<MovableType T>
+  TSQueue<T>::TSQueue(TSQueue<T>&& other)
+  {
+    std::lock_guard(other.data_mutex_);
+    data_ = std::move(other.data_);
+  }
+
+  template<MovableType T>
+  TSQueue<T>& TSQueue<T>::operator=(TSQueue<T>&& other)
+  {
+    if (this == &other) return;
+    std::scoped_lock lock(data_mutex_, other.data_mutex_);
+    data_ = std::move(other.data_);
+  }
 
   template<MovableType U>
   void TSSwap(TSQueue<U>& lhs, TSQueue<U>& rhs)
