@@ -20,12 +20,8 @@ namespace ep
 
   static_assert(sizeof(GamePacket) == GAME_PACKET_SIZE);
 
-  inline std::uint8_t* SerializeGamePacket(GamePacket& packet)
+  inline std::uint8_t* SerializeGamePacket(const GamePacket& packet, std::uint8_t* buf)
   {
-    std::uint8_t* data = new std::uint8_t[GAME_PACKET_SIZE];
-    if (!data)
-      return nullptr;
-
     if constexpr (std::endian::native != std::endian::big) {
       GamePacket g{};
     
@@ -33,12 +29,12 @@ namespace ep
       g.x_  = htonf32(packet.x_);
       g.y_  = htonf32(packet.y_);
 
-      std::memcpy(data, &g, GAME_PACKET_SIZE);
+      std::memcpy(buf, &g, GAME_PACKET_SIZE);
     } else {
-      std::memcpy(data, &packet, GAME_PACKET_SIZE);
+      std::memcpy(buf, &packet, GAME_PACKET_SIZE);
     }
 
-    return data;
+    return buf;
   }
 
   inline std::optional<GamePacket> ParseGamePacket(std::uint8_t *data, std::size_t size)

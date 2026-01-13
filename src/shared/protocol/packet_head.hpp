@@ -25,12 +25,8 @@ namespace ep
 
   static_assert(sizeof(PacketHead) == PACKET_HEAD_SIZE);
 
-  inline std::uint8_t* SerializePacketHead(PacketHead& packet)
+  inline std::uint8_t* SerializePacketHead(const PacketHead& packet, std::uint8_t* buf)
   {
-    std::uint8_t* data = new std::uint8_t[PACKET_HEAD_SIZE];
-    if (!data)
-      return nullptr;
-
     if constexpr (std::endian::native != std::endian::big) {
       PacketHead h{};
 
@@ -41,12 +37,12 @@ namespace ep
       h.tick_        = htobe64(packet.tick_);
       h.sequence_id_ = htobe64(packet.sequence_id_);
 
-      std::memcpy(data, &h, PACKET_HEAD_SIZE);
+      std::memcpy(buf, &h, PACKET_HEAD_SIZE);
     } else {
-      std::memcpy(data, &packet, PACKET_HEAD_SIZE);
+      std::memcpy(buf, &packet, PACKET_HEAD_SIZE);
     }
 
-    return data;
+    return buf;
   }
 
   inline std::optional<PacketHead> ParsePacketHead(std::uint8_t *data, std::size_t size)

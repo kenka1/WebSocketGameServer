@@ -48,13 +48,13 @@ namespace ep
     return static_cast<Opcodes>(opcode);
   }
 
-  inline std::uint8_t packet_type_to_uint8(PacketType type)
+  inline std::uint8_t packet_type_to_uint8(PacketType packet_type)
   {
-    return static_cast<std::uint8_t>(type);
+    return static_cast<std::uint8_t>(packet_type);
   }
 
-  inline PacketType to_packet_type(std::uint8_t type)
+  inline PacketType to_packet_type(std::uint8_t packet_type)
   {
-    return static_cast<PacketType>(type);
+    return static_cast<PacketType>(packet_type);
   }
 }
