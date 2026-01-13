@@ -32,9 +32,9 @@ namespace ep
   };
 
   enum class PacketType : std::uint8_t {
-    PACKET_TYPE_AUTH  = 0x01,
-    PACKET_TYPE_GAME  = 0x02,
-    PACKET_TYPE_INPUT = 0x03,
+    PACKET_TYPE_AUTH       = 0x01,
+    PACKET_TYPE_GAME       = 0x02,
+    PACKET_TYPE_GAME_INPUT = 0x03,
   };
 
   inline std::uint16_t opcode_to_uint16(Opcodes opcode)
