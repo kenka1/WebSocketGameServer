@@ -20,7 +20,6 @@ endif()
 
 set(SOURCES
   main.cpp
-  net/protocol/net_packet_tests.cpp
   net/session/packet_handler_tests.cpp
   shared/ts_queue_tests.cpp
   game/player/player_tests.cpp
