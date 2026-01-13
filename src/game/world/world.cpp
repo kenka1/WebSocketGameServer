@@ -72,7 +72,7 @@ namespace ep::game
   void World::Tick(double dt)
   {
     // Double buffering incoming queue.
-    TSQueue<ServerPacket<PacketHead>> tick_queue{std::move(game_subsystem_->in_queue_)};
+    auto tick_queue{std::move(game_subsystem_->in_queue_)};
 
     // FIX Reset x velocity
     for (auto& item : players_)
