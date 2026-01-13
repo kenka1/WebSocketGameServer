@@ -45,20 +45,12 @@ namespace ep
     std::optional<T> body_;
   };
 
-  template<PODType T>
-  std::uint8_t* ServerPacket<T>::SerializePacket()
+  template<>
+  inline std::uint8_t* ServerPacket<GamePacket>::SerializePacket()
   {
-    switch (to_packet_type(head_.type_)) {
-      case PacketType::PACKET_TYPE_GAME:
-      {
-        std::uint8_t* buf = new std::uint8_t[PACKET_HEAD_SIZE + GAME_PACKET_SIZE];
-        SerializePacketHead(head_, buf);
-        GamePacket& packet = static_cast<T>(body_.value());
-        SerializeGamePacket(packet, buf + PACKET_HEAD_SIZE);
-        return buf;
-      }
-      default:
-        spdlog::warn("PacketType is not implemented");
-    }
+    std::uint8_t* buf = new std::uint8_t[PACKET_HEAD_SIZE + GAME_PACKET_SIZE];
+    SerializePacketHead(head_, buf);
+    SerializeGamePacket(*body_, buf + PACKET_HEAD_SIZE);
+    return buf;
   }
 }

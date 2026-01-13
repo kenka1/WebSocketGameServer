@@ -52,20 +52,3 @@ TEST(TSQueueTest, WaitAndPop)
   auto value = data.WaitAndPop();
   EXPECT_EQ(value, 1);
 }
-
-TEST(TSQueueTest, Swap)
-{
-  ep::TSQueue<int>data;
-
-  for (int i = 0; i < 5; i++)
-    data.Push(1);
-  EXPECT_EQ(data.Size(), 5);
-
-  ep::TSQueue<int> tmp;
-  EXPECT_EQ(tmp.Size(), 0);
-
-  TSSwap(tmp, data);
-
-  EXPECT_EQ(data.Size(), 0);
-  EXPECT_EQ(tmp.Size(), 5);
-}

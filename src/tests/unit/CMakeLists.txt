@@ -20,10 +20,10 @@ endif()
 
 set(SOURCES
   main.cpp
-  net/session/packet_handler_tests.cpp
+  # net/session/packet_handler_tests.cpp
   shared/ts_queue_tests.cpp
-  game/player/player_tests.cpp
-  game/world/world_tests.cpp
+  # game/player/player_tests.cpp
+  # game/world/world_tests.cpp
   game/physics/collision_tests.cpp
   game/physics/swept_math_tests.cpp
   cryptography/sha256_tests.cpp

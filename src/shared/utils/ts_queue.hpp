@@ -13,8 +13,6 @@ namespace ep
 
   template<MovableType T>
   class TSQueue {
-    template<MovableType U>
-    friend void TSSwap(TSQueue<U>& lhs, TSQueue<U>& rhs);
   public:
     TSQueue() = default;
     TSQueue(const TSQueue&) = delete;
@@ -47,19 +45,9 @@ namespace ep
   template<MovableType T>
   TSQueue<T>& TSQueue<T>::operator=(TSQueue<T>&& other)
   {
-    if (this == &other) return;
+    if (this == &other) return *this;
     std::scoped_lock lock(data_mutex_, other.data_mutex_);
     data_ = std::move(other.data_);
-  }
-
-  template<MovableType U>
-  void TSSwap(TSQueue<U>& lhs, TSQueue<U>& rhs)
-  {
-    if (&lhs == &rhs) return;
-    std::scoped_lock lock(lhs.data_mutex_, rhs.data_mutex_);
-    auto tmp = std::move(lhs.data_);
-    lhs.data_ = std::move(rhs.data_);
-    rhs.data_ = std::move(tmp);
   }
 
   template<MovableType T>
