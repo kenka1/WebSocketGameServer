@@ -26,20 +26,26 @@ namespace ep::net
     ~Server() = default;
 
     bool StartListen(tcp::endpoint endpoint) noexcept;
-    // Async accept new client.
+    // Async accept new client
     void Run();
 
-    void PushPacket(std::unique_ptr<ServerPacket> packet) noexcept;
+    void PushPacketToGame(ServerPacket<PacketHead> packet);
+
     void AddSession(std::shared_ptr<Session> session) noexcept;
     void CloseSession(std::size_t id);
     void Sender();
   private:
+    // Boost
     net::io_context& ioc_;
     ssl::context& ctx_;
     tcp::acceptor acceptor_;
+
+    // Clients
     mutable std::mutex sessions_mutex_;
     std::atomic<std::size_t> new_session_id_;
     std::unordered_map<std::size_t, std::shared_ptr<Session>> sessions_;
+
+    // Subsystems
     std::shared_ptr<NetworkSubsystem> net_susbsystem_;
     std::shared_ptr<GameSubsystem> game_susbsystem_;
   };

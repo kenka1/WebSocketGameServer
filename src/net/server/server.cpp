@@ -9,6 +9,7 @@
 #include <boost/asio/strand.hpp>
 
 #include "protocol/opcodes.hpp"
+#include "protocol/packet_head.hpp"
 #include "protocol/server_packet.hpp"
 #include "session/session.hpp"
 #include "socket/ws_socket.hpp"
@@ -70,9 +71,9 @@ namespace ep::net
       {
         if (!ec) {
           // auto wsssocket = std::make_shared<WSSSocket>(std::move(socket), ctx_);
-          auto wssocket = std::make_shared<WSSocket>(std::move(socket));
+          auto wssocket = std::make_unique<WSSocket>(std::move(socket));
           std::size_t id = new_session_id_.fetch_add(1);
-          auto session = std::make_shared<Session>(shared_from_this(), wssocket, id);
+          auto session = std::make_shared<Session>(shared_from_this(), std::move(wssocket), id);
           session->Run();
         } else {
           spdlog::error("async_accept: {}", ec.what());
@@ -90,34 +91,37 @@ namespace ep::net
       std::lock_guard lock(sessions_mutex_);
       sessions_[session->GetID()] = session;
     }
-    // net_susbsystem_->in_queue_.Push(NetPacket(Opcodes::CreatePlayer, session->GetID()));
-    spdlog::info("Push Opcodes::CreatePlayer\nfile: {} line: {}", __FILE__, __LINE__);
-    auto packet = std::make_unique<ServerPacket>(NetPacket(Opcodes::CreatePlayer), session->GetID());
-    net_susbsystem_->in_queue_.Push(std::move(packet));
+
+    // Push event to game
+    PacketHead packet{
+      1,
+      opcode_to_uint16(Opcodes::OPCODE_CREATE_PLAYER),
+      packet_type_to_uint8(PacketType::PACKET_TYPE_EVENT),
+    };
+    game_susbsystem_->in_queue_.Push({ResponseType::Incoming, session->GetID(), packet});
   }
  
   void Server::Sender()
   {
     spdlog::info("Server::Sender");
     for (;;) {
-      auto packet = net_susbsystem_->out_queue_.WaitAndPop();
-      // Make flat buffer from packet.
-      auto net_packet = packet->GetNetPacket();
-      auto buf = std::make_shared<std::vector<std::uint8_t>>(std::move(net_packet.MakeBuffer()));
+      auto packet = game_susbsystem_->out_queue_.WaitAndPop();
+      std::uint32_t buf_size = packet.GetPacketHead().size_;
+      std::shared_ptr<std::uint8_t[]> buf{packet.SerializePacket()};
 
-      switch (packet->GetType()) {
-        case PacketType::Rpc:
-          sessions_[packet->GetID()]->PushToSend(buf);
+      switch (packet.GetResponseType()) {
+        case ResponseType::Rpc:
+          sessions_[packet.GetID()]->PushToSend({buf_size, std::move(buf)});
           break;
-        case PacketType::Broadcast:
+        case ResponseType::Broadcast:
           for (const auto& elem: sessions_) {
-            elem.second->PushToSend(buf);
+            elem.second->PushToSend({buf_size, buf});
           }
           break;
-        case PacketType::RpcOthers:
+        case ResponseType::RpcOthers:
           for (const auto& elem: sessions_) {
-            if (elem.first != packet->GetID()) {
-              elem.second->PushToSend(buf);
+            if (elem.first != packet.GetID()) {
+              elem.second->PushToSend({buf_size, buf});
             }
           }
           break;
@@ -127,9 +131,9 @@ namespace ep::net
     }
   }
 
-  void Server::PushPacket(std::unique_ptr<ServerPacket> packet) noexcept
+  void Server::PushPacketToGame(ServerPacket<PacketHead> packet)
   {
-    net_susbsystem_->in_queue_.Push(std::move(packet));
+    game_susbsystem_->in_queue_.Push(packet);
   }
 
   void Server::CloseSession(std::size_t id)
@@ -137,9 +141,15 @@ namespace ep::net
     std::lock_guard lock(sessions_mutex_);
     if (sessions_.find(id) != sessions_.end()) {
       sessions_.erase(id);
-      spdlog::info("Push Opcodes::RemovePlayer\nfile: {} line: {}", __FILE__, __LINE__);
-      auto packet = std::make_unique<ServerPacket>(NetPacket(Opcodes::RemovePlayer), id);
-      net_susbsystem_->in_queue_.Push(std::move(packet));
+  
+      // Push event to game
+      PacketHead packet{
+        1,
+        opcode_to_uint16(Opcodes::OPCODE_REMOVE_PLAYER),
+        packet_type_to_uint8(PacketType::PACKET_TYPE_EVENT),
+      };
+
+      game_susbsystem_->in_queue_.Push({ResponseType::Incoming, id, packet});
     } else {
       spdlog::error("Server::CloseSession errror id: {}", id);
     }
