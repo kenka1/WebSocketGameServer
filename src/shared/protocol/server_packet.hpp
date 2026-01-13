@@ -4,9 +4,6 @@
 #include <cstdint>
 
 #include "protocol/game_packet.hpp"
-#include "spdlog/spdlog.h"
-
-#include "protocol/opcodes.hpp"
 #include "protocol/packet_head.hpp"
 
 namespace ep
