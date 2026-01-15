@@ -18,7 +18,7 @@
     return htons(host_16bits);
   }
 
-  inline std::uint16_t htole16(std::uint16_t host_16bits)
+  inline std::uint16_t be16toh(std::uint16_t host_16bits)
   {
     return htons(host_16bits);
   }
@@ -28,7 +28,7 @@
     return htonl(host_32bits);
   }
 
-  inline std::uint32_t htole32(std::uint32_t host_32bits)
+  inline std::uint32_t be32toh(std::uint32_t host_32bits)
   {
     return ntohl(host_32bits);
   }
@@ -38,7 +38,7 @@
     return htonll(host_64bits);
   }
 
-  inline std::uint64_t htole64(std::uint64_t host_64bits)
+  inline std::uint64_t be64toh(std::uint64_t host_64bits)
   {
     return ntohll(host_64bits);
   }

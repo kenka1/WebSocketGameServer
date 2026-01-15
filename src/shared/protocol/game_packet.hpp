@@ -46,7 +46,7 @@ namespace ep
     std::memcpy(&g, data, GAME_PACKET_SIZE);  
 
     if constexpr (std::endian::native != std::endian::big) {
-      g.hp_ = htole32(g.hp_);
+      g.hp_ = be32toh(g.hp_);
       g.x_  = ntohf32(g.x_);
       g.y_  = ntohf32(g.y_);
     }

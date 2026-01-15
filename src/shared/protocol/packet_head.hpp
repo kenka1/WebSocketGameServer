@@ -54,11 +54,12 @@ namespace ep
     std::memcpy(&h, data, PACKET_HEAD_SIZE);  
 
     if constexpr (std::endian::native != std::endian::big) {
-      h.version_     = htole16(h.version_);
-      h.opcode_      = htole16(h.opcode_);
-      h.size_        = htole32(h.size_);
-      h.tick_        = htole32(h.tick_);
-      h.sequence_id_ = htole64(h.sequence_id_);
+      h.version_     = be16toh(h.version_);
+      h.opcode_      = be16toh(h.opcode_);
+      h.type_        = h.type_;
+      h.size_        = be32toh(h.size_);
+      h.tick_        = be64toh(h.tick_);
+      h.sequence_id_ = be64toh(h.sequence_id_);
     }
 
     return std::optional<PacketHead>{h};
