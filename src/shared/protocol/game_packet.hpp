@@ -7,32 +7,33 @@
 namespace ep
 {
   constexpr std::size_t GAME_PACKET_SIZE = 
-    sizeof(std::uint32_t) +
-    sizeof(float) * 2;
+    sizeof(std::uint32_t) * 3;
 
 #pragma pack(push, 1)
-  struct GamePacket {
+  struct GamePacketNet {
     std::uint32_t hp_; // Player heath points
-    float         x_;  // Player world x position
-    float         y_;  // Player world y position
+    std::uint32_t x_;  // Player world x position
+    std::uint32_t y_;  // Player world y position
   };
 #pragma pack(pop)
 
-  static_assert(sizeof(GamePacket) == GAME_PACKET_SIZE);
+  struct GamePacket {
+    std::uint32_t hp_;
+    float x_;
+    float y_;
+  };
+
+  static_assert(sizeof(GamePacketNet) == GAME_PACKET_SIZE);
 
   inline std::uint8_t* SerializeGamePacket(const GamePacket& packet, std::uint8_t* buf)
   {
-    if constexpr (std::endian::native != std::endian::big) {
-      GamePacket g{};
-    
-      g.hp_ = htobe32(packet.hp_);
-      g.x_  = htonf32(packet.x_);
-      g.y_  = htonf32(packet.y_);
+    GamePacketNet g{};
+  
+    g.hp_ = htobe32(packet.hp_);
+    g.x_  = htonf32(packet.x_);
+    g.y_  = htonf32(packet.y_);
 
-      std::memcpy(buf, &g, GAME_PACKET_SIZE);
-    } else {
-      std::memcpy(buf, &packet, GAME_PACKET_SIZE);
-    }
+    std::memcpy(buf, &g, GAME_PACKET_SIZE);
 
     return buf;
   }
@@ -42,15 +43,14 @@ namespace ep
     if (size < GAME_PACKET_SIZE)
       return std::nullopt;
 
-    GamePacket g{};
+    GamePacketNet g{};
     std::memcpy(&g, data, GAME_PACKET_SIZE);  
 
-    if constexpr (std::endian::native != std::endian::big) {
-      g.hp_ = be32toh(g.hp_);
-      g.x_  = ntohf32(g.x_);
-      g.y_  = ntohf32(g.y_);
-    }
+    GamePacket packet{};
+    packet.hp_ = be32toh(g.hp_);
+    packet.x_  = ntohf32(g.x_);
+    packet.y_  = ntohf32(g.y_);
 
-    return std::optional<GamePacket>{g};
+    return std::optional<GamePacket>{packet};
   }
 }

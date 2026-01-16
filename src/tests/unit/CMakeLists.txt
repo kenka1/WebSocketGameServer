@@ -24,6 +24,7 @@ set(SOURCES
   # src/shared
   shared/utils/ts_queue_tests.cpp
   shared/protocol/packet_head_tests.cpp
+  shared/protocol/game_packet_tests.cpp
 
   # src/game
   game/physics/collision_tests.cpp
