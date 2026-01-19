@@ -1,13 +1,7 @@
 #include "ws_socket.hpp"
 
-#include <boost/asio/buffer.hpp>
-#include <boost/asio/ssl/stream_base.hpp>
-#include <boost/beast/core/error.hpp>
-#include <boost/beast/websocket/rfc6455.hpp>
-#include <boost/beast/websocket/ssl.hpp>
-#include <boost/system/detail/error_code.hpp>
-
 #include <cstdint>
+
 #include <spdlog/spdlog.h>
 
 namespace ep::net
@@ -34,7 +28,7 @@ namespace ep::net
     // Cancel all async operations
     boost::system::error_code ec;
     if (socket_.next_layer().is_open()) {
-      socket_.next_layer().cancel(ec);
+      ec = socket_.next_layer().cancel(ec);
       if (ec)
         spdlog::warn("Cancel error: {}", ec.what());
     }
