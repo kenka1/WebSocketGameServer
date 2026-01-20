@@ -47,11 +47,6 @@ namespace ep::net
     );
   }
 
-  void WSSocket::async_accept(CompletionHandler handler)
-  {
-    socket_.async_accept(std::move(handler));
-  }
-
   void WSSocket::async_read_some(std::uint8_t* buffer, std::size_t limit, ReadHandler handler)
   {
     socket_.async_read_some(net::buffer(buffer, limit), std::move(handler));
@@ -60,10 +55,5 @@ namespace ep::net
   void WSSocket::async_write(const std::uint8_t* buffer, std::size_t limit, ReadHandler handler)
   {
     socket_.async_write(net::buffer(buffer, limit), handler);
-  }
-
-  std::string WSSocket::string_address()
-  {
-    return socket_.next_layer().remote_endpoint().address().to_string();
   }
 }

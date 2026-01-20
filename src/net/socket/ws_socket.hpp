@@ -4,7 +4,6 @@
 #include <memory>
 
 #include <boost/asio/ip/tcp.hpp>
-#include "boost/asio/ssl/stream.hpp"
 #include <boost/beast/websocket/stream.hpp>
 
 #include "aliases/asio_aliases.hpp"
@@ -20,12 +19,9 @@ namespace ep::net
     WSSocket& operator=(WSSocket&) = delete;
     ~WSSocket() = default;
 
-    void async_accept(CompletionHandler handler) override;
     void async_read_some(std::uint8_t* buffer, std::size_t limit, ReadHandler handler) override;
     void async_write(const std::uint8_t* buffer, std::size_t limit, ReadHandler handler) override;
-
     void close() override;
-    std::string string_address() override;
 
   private:
     void Cancel();
